@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "1043126950969",
+    "firebase_url": "https://voiash-794d0.firebaseio.com",
+    "project_id": "voiash-794d0",
+    "storage_bucket": "voiash-794d0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1043126950969:android:9f74a215fe68889d",
+        "android_client_info": {
+          "package_name": "com.pitaya.voiash"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1043126950969-m1uap71bg7nato25e2qts62p3q5muiut.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pitaya.voiash",
+            "certificate_hash": "3c96d3f5495c6a97601c868dc08d90f6df1e2fb8"
+          }
+        },
+        {
+          "client_id": "1043126950969-gqqm2bltveql51vjsg3a493gd5877ojh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPi6DvNZvXxbDV0gVV9JnTwDLytjduI2s"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1043126950969-lh688ufjkhuqgfg92dc9i4she2ng8b89.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pitaya.Voiash"
+              }
+            },
+            {
+              "client_id": "1043126950969-gqqm2bltveql51vjsg3a493gd5877ojh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
