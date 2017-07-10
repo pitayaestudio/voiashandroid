@@ -65,7 +65,7 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
         et_mail = (EditText) findViewById(R.id.et_email);
         et_pass = (EditText) findViewById(R.id.et_pass);
         email_sign_in_button.setOnClickListener(this);
-        loginButton.setReadPermissions(new String[]{"public_profile", "email"});
+        loginButton.setReadPermissions(new String[]{"public_profile", "email", "user_birthday"});
         callbackManager = CallbackManager.Factory.create();
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -75,8 +75,8 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
                         new GraphRequest.GraphJSONObjectCallback() {
                             @Override
                             public void onCompleted(JSONObject object, GraphResponse response) {
-                                Log.v(TAG, response.toString());
-                                handleFacebookAccessToken(loginResult.getAccessToken());
+                                Log.v(TAG, response.getJSONObject().toString());
+                                handleFacebookAccessToken(loginResult.getAccessToken(), response.getJSONObject().optString("birthday", null));
                             }
                         });
                 Bundle parameters = new Bundle();
@@ -157,7 +157,7 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
         startActivityForResult(signInIntent, RC_GOOGLE_SIGN_IN);
     }
 
-    private void handleFacebookAccessToken(final AccessToken token) {
+    private void handleFacebookAccessToken(final AccessToken token, final String birthday) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
@@ -172,6 +172,7 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
                             voiashUser.setProvider("facebook");
                             String[] name = user.getDisplayName().split(" ");
                             voiashUser.setName(name[0]);
+                            voiashUser.setBirthday(birthday);
                             if (name.length > 1)
                                 voiashUser.setLastName(name[1]);
                             voiashUser.setProfilePicture("http://graph.facebook.com/" + token.getUserId() + "/picture?type=large");

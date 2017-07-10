@@ -38,8 +38,10 @@
     <string name="prompt_email">Email</string>
     <string name="prompt_lastname">Apellidos</string>
     <string name="prompt_name">Nombre</string>
+    <string name="prompt_birthday">Fecha de nacimiento</string>
     <string name="prompt_password">Contraseña</string>
     <string name="lbl_new_user">¿Eres usuario nuevo? Regístrate aquí</string>
     <string name="lbl_create_account">Crea tu cuenta y vive un mundo de viajes y aventuras con Voiash</string>
     <string name="lbl_signup">Registrarse</string>
+    <string name="format_years">%d años</string>
 </resources>

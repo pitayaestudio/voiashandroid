@@ -9,8 +9,11 @@ import android.support.v4.app.Fragment;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.SimpleDateFormat;
+
 public class BaseFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
+    SimpleDateFormat firebaseDateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
     public BaseFragment() {
         // Required empty public constructor

@@ -2,6 +2,7 @@
     <string name="app_name">Voiash</string>
     <string name="facebook_app_id">2052042458356841</string>
     <string name="prompt_email">Email</string>
+    <string name="prompt_birthday">Birthday</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Login with email</string>
     <string name="lbl_please_wait">Please wait</string>
@@ -42,4 +43,5 @@
     <string name="lbl_account_deleted">The account has been deleted successfully</string>
     <string name="lbl_new_user">New user? Sign up here</string>
     <string name="lbl_create_account">Create your account and live a world of travel and adventure with Voiash</string>
+    <string name="format_years">%d years</string>
 </resources>

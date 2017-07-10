@@ -12,8 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,13 +24,15 @@ import com.pitaya.voiash.Core.VoiashUser;
 import com.pitaya.voiash.R;
 import com.pitaya.voiash.Util.Log;
 
-import jp.wasabeef.glide.transformations.CropCircleTransformation;
+import java.util.Calendar;
+
+import static com.pitaya.voiash.Util.UI.setProfilePicture;
 
 public class ProfileFragment extends BaseFragment {
     private FirebaseUser firebaseUser;
     private DatabaseReference userReference;
     private ValueEventListener userListener;
-    private TextView txt_profile_name;
+    private TextView txt_profile_name, txt_profile_age;
     private ImageView img_profile_picture;
     private Button btn_delete_account, btn_sign_out;
     private final String TAG = "ProfileFragment";
@@ -56,6 +56,7 @@ public class ProfileFragment extends BaseFragment {
         txt_profile_name = (TextView) v.findViewById(R.id.txt_profile_name);
         btn_delete_account = (Button) v.findViewById(R.id.btn_delete_account);
         btn_sign_out = (Button) v.findViewById(R.id.btn_sign_out);
+        txt_profile_age = (TextView) v.findViewById(R.id.txt_profile_age);
         return v;
     }
 
@@ -68,10 +69,24 @@ public class ProfileFragment extends BaseFragment {
             userListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    VoiashUser user = dataSnapshot.getValue(VoiashUser.class);
-                    if (user != null) {
-                        txt_profile_name.setText(user.getFullName());
-                        Glide.with(ProfileFragment.this).load(user.getProfilePicture()).diskCacheStrategy(DiskCacheStrategy.ALL).bitmapTransform(new CropCircleTransformation(getContext())).into(img_profile_picture);
+                    try {
+                        VoiashUser user = dataSnapshot.getValue(VoiashUser.class);
+                        if (user != null) {
+                            txt_profile_name.setText(user.getFullName());
+                            setProfilePicture(getContext(), user.getProfilePicture(), img_profile_picture);
+                            try {
+                                Calendar userDate = Calendar.getInstance();
+                                userDate.setTime(firebaseDateFormat.parse(user.getBirthday()));
+                                Calendar currentDate = Calendar.getInstance();
+                                currentDate.add(Calendar.DAY_OF_YEAR, -userDate.get(Calendar.DAY_OF_YEAR));
+                                int diff = currentDate.get(Calendar.YEAR) - userDate.get(Calendar.YEAR);
+                                txt_profile_age.setText(String.format(getString(R.string.format_years), diff));
+                                txt_profile_age.setVisibility(View.VISIBLE);
+                            } catch (Exception x) {
+
+                            }
+                        }
+                    } catch (Exception x) {
                     }
                 }
 

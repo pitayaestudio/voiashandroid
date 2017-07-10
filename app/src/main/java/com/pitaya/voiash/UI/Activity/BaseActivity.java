@@ -14,6 +14,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.pitaya.voiash.R;
 import com.pitaya.voiash.Util.PreferencesHelper;
 
+import java.text.SimpleDateFormat;
+
 /**
  * Created by rulo on 06/07/17.
  */
@@ -21,7 +23,7 @@ import com.pitaya.voiash.Util.PreferencesHelper;
 public class BaseActivity extends AppCompatActivity {
     private ProgressDialog dialog;
     PreferencesHelper preferencesHelper;
-
+    SimpleDateFormat firebaseDateFormat = new SimpleDateFormat("MM/dd/yyyy");
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

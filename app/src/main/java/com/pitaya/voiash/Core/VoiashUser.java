@@ -15,8 +15,26 @@ public class VoiashUser implements Parcelable {
     private String profilePicture;
     private String provider;
     private String pushToken;
+    private String birthday;
 
     public VoiashUser() {
+    }
+
+
+    protected VoiashUser(Parcel in) {
+        email = in.readString();
+        lastName = in.readString();
+        name = in.readString();
+        phoneNumber = in.readString();
+        profilePicture = in.readString();
+        provider = in.readString();
+        pushToken = in.readString();
+        birthday = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public String getEmail() {
@@ -75,8 +93,16 @@ public class VoiashUser implements Parcelable {
         this.pushToken = pushToken;
     }
 
+    public String getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
+    }
+
     public String getFullName() {
-        return String.format("%s %s", name, lastName);
+        return String.format("%s %s", getName(), getLastName());
     }
 
     @Override
@@ -89,22 +115,8 @@ public class VoiashUser implements Parcelable {
                 ", profilePicture='" + profilePicture + '\'' +
                 ", provider='" + provider + '\'' +
                 ", pushToken='" + pushToken + '\'' +
+                ", birthday='" + birthday + '\'' +
                 '}';
-    }
-
-    protected VoiashUser(Parcel in) {
-        email = in.readString();
-        lastName = in.readString();
-        name = in.readString();
-        phoneNumber = in.readString();
-        profilePicture = in.readString();
-        provider = in.readString();
-        pushToken = in.readString();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
     }
 
     @Override
@@ -116,6 +128,7 @@ public class VoiashUser implements Parcelable {
         dest.writeString(profilePicture);
         dest.writeString(provider);
         dest.writeString(pushToken);
+        dest.writeString(birthday);
     }
 
     @SuppressWarnings("unused")
