@@ -29,6 +29,7 @@ public class SignInActivity extends BaseAuthActivity implements View.OnClickList
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationIcon(R.drawable.ic_arrow_main);
+        getSupportActionBar().setTitle("");
         textInputLayouts = new TextInputLayout[]{
                 (TextInputLayout) findViewById(R.id.til_signin_name),
                 (TextInputLayout) findViewById(R.id.til_signin_lastname),
@@ -72,9 +73,14 @@ public class SignInActivity extends BaseAuthActivity implements View.OnClickList
                                 voiashUser.setLastName(editTexts[1].getText().toString());
                                 getBaseReference().child("users").child(task.getResult().getUser().getUid()).setValue(voiashUser);
                                 task.getResult().getUser().sendEmailVerification();
+                                preferencesHelper.putIsEmailProvider();
+                                preferencesHelper.putHasConfirmedEmail(task.getResult().getUser().isEmailVerified());
                             } else {
                                 if (task.getException() != null) {
                                     if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                                        showAlert(getString(R.string.error_title), getString(R.string.error_user_exists));
+                                    } else {
+                                        showAlert(getString(R.string.error_title), getString(R.string.error_generic));
                                     }
                                 }
                                 Log.d(TAG, task.getException().getMessage());
@@ -131,4 +137,7 @@ public class SignInActivity extends BaseAuthActivity implements View.OnClickList
             til.setErrorEnabled(false);
         }
     }
+
+
+
 }

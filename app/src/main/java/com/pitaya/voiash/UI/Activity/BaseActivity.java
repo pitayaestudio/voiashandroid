@@ -2,13 +2,17 @@ package com.pitaya.voiash.UI.Activity;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pitaya.voiash.R;
+import com.pitaya.voiash.Util.PreferencesHelper;
 
 /**
  * Created by rulo on 06/07/17.
@@ -16,9 +20,22 @@ import com.pitaya.voiash.R;
 
 public class BaseActivity extends AppCompatActivity {
     private ProgressDialog dialog;
+    PreferencesHelper preferencesHelper;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        preferencesHelper = new PreferencesHelper(this);
+    }
 
     public DatabaseReference getBaseReference() {
         return FirebaseDatabase.getInstance().getReference().child("devDB");
+    }
+
+    public DatabaseReference getUserReference() {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null)
+            return getBaseReference().child("users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        return null;
     }
 
     public void showAlert(String title, String message, DialogInterface.OnClickListener onClickListener) {
