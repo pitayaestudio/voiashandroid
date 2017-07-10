@@ -21,7 +21,6 @@
             android:id="@+id/linearLayout"
             android:layout_width="0dp"
             android:layout_height="100dp"
-            android:background="@color/colorAccent"
             android:orientation="horizontal"
             android:weightSum="3"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -50,8 +49,24 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_mail_outline" />
+                android:src="@drawable/ic_login_email" />
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center_horizontal"
+            android:text="¿Eres usuario nuevo? Regístrate aquí"
+            android:textColor="#212121"
+            android:textSize="13sp"
+            android:textStyle="normal"
+            app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
 
         <ImageView
             android:layout_width="0dp"
@@ -142,9 +157,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/round_button_blue"
-                android:drawableLeft="@drawable/ic_mail_outline"
-                android:drawablePadding="8dp"
+                android:background="@drawable/round_button_gradient"
                 android:paddingLeft="80dp"
                 android:paddingRight="80dp"
                 android:text="@string/action_sign_in"

@@ -6,29 +6,30 @@
     android:layout_height="match_parent"
     tools:context="com.pitaya.voiash.UI.Activity.SplashActivity">
 
-
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_marginLeft="64dp"
+        android:layout_marginRight="64dp"
+        android:layout_marginTop="120dp"
+        android:adjustViewBounds="true"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_logo_white" />
 
     <ImageView
-        android:id="@+id/imageView2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="-120dp"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
         android:adjustViewBounds="true"
         android:cropToPadding="true"
-        android:scaleType="fitCenter"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:srcCompat="@drawable/img_buildings" />
+        app:srcCompat="@drawable/login_bg_un_color_05" />
 
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/img_plane"
-        tools:layout_editor_absoluteY="224dp"
-        tools:layout_editor_absoluteX="31dp" />
 </android.support.constraint.ConstraintLayout>

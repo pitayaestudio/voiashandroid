@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Voiash</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="action_sign_in_short">Iniciar sesión</string>
+    <string name="action_sign_in">Iniciar con email</string>
+    <string name="error_credentials">Correo electrónico o contraseña incorrecta</string>
+    <string name="error_field_required">Campo requerido</string>
+    <string name="error_generic">Se ha producido un error. Inténtalo de nuevo</string>
+    <string name="error_incorrect_password">Contraseña incorrecta</string>
+    <string name="error_invalid_email">Correo electrónico inválido</string>
+    <string name="error_invalid_password">La contraseña es demasiado corta</string>
+    <string name="error_password_length">La contraseña debe contener al menos 6 caracteres</string>
+    <string name="error_password_match">Las contraseñas no coinciden</string>
+    <string name="error_password_spaces">La contraseña no debe contener espacios en blanco</string>
+    <string name="error_required_field">Campo requerido</string>
+    <string name="error_title">Error</string>
+    <string name="error_user_exists">Ya existe un usuario con este Email</string>
+    <string name="facebook_app_id">2052042458356841</string>
+    <string name="lbl_account_deleted">La cuenta se ha eliminado correctamente</string>
+    <string name="lbl_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="lbl_disclaimer">Al registrarte, aceptas los términos y condiciones de Voiash</string>
+    <string name="lbl_loading_information">Cargando información</string>
+    <string name="lbl_login">REGÍSTRATE Y DISFRUTA</string>
+    <string name="lbl_menu_chat">Chat</string>
+    <string name="lbl_menu_discover">Descubre</string>
+    <string name="lbl_menu_my_travel">Mi viaje</string>
+    <string name="lbl_menu_profile">Perfil</string>
+    <string name="lbl_menu_social">Social</string>
+    <string name="lbl_password_recover">Recuperar contraseña</string>
+    <string name="lbl_password_recovery">Recordar contraseña</string>
+    <string name="lbl_please_wait">Por favor espere</string>
+    <string name="lbl_recover_sent">Se ha enviado un correo de recuperación al email proporcionado</string>
+    <string name="lbl_recover_title">¿No recuerdas tu contraseña? Coloca tu email y nosotros te envíaremos un link para resetear tu password</string>
+    <string name="lbl_signin">Iniciar Sesión</string>
+    <string name="lbl_travel_deals">INGRESAR SIN REGISTRAR</string>
+    <string name="prompt_confirm_password">Repetir contraseña</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_lastname">Apellidos</string>
+    <string name="prompt_name">Nombre</string>
+    <string name="prompt_password">Contraseña</string>
+    <string name="lbl_new_user">¿Eres usuario nuevo? Regístrate aquí</string>
+    <string name="lbl_create_account">Crea tu cuenta y vive un mundo de viajes y aventuras con Voiash</string>
+    <string name="lbl_signup">Registrarse</string>
+</resources>

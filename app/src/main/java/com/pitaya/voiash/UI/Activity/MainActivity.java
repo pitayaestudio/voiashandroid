@@ -10,26 +10,33 @@ import android.support.v4.content.ContextCompat;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
+import com.google.firebase.database.DatabaseReference;
 import com.pitaya.voiash.R;
 import com.pitaya.voiash.UI.Fragment.BaseFragment;
+import com.pitaya.voiash.UI.Fragment.DialogFragment.ConfirmEmailDialog;
 import com.pitaya.voiash.UI.Fragment.ProfileFragment;
 import com.pitaya.voiash.Util.Log;
 
 import java.util.HashMap;
 
 public class MainActivity extends BaseMainActivity implements BaseFragment.OnFragmentInteractionListener, AHBottomNavigation.OnTabSelectedListener {
-    AHBottomNavigation bottomNavigation;
-    SelectedNavigationElement selectedNavigationElement;
-    HashMap<Integer, Fragment> fragmentHashMap = new HashMap<>();
+    private AHBottomNavigation bottomNavigation;
+    private SelectedNavigationElement selectedNavigationElement;
+    private HashMap<Integer, Fragment> fragmentHashMap = new HashMap<>();
     private int mSelectedItem;
+    private static final String TAG = "MainActivity";
+    private DatabaseReference userReference;
+    Boolean isShownDialog = false;
+    ConfirmEmailDialog confirmEmailDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        userReference = getUserReference();
+        userReference.keepSynced(true);
         setContentView(R.layout.activity_main);
         bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
         // bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
-
         //TODO Change Fragments
 
         fragmentHashMap.put(0, ProfileFragment.newInstance());
@@ -95,6 +102,26 @@ public class MainActivity extends BaseMainActivity implements BaseFragment.OnFra
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (preferencesHelper.getIsEmailProvider() && !preferencesHelper.getHasConfirmedEmail()) {
+            mAuth.getCurrentUser().reload();
+            if (!mAuth.getCurrentUser().isEmailVerified()) {
+                if (!isShownDialog) {
+                    confirmEmailDialog = ConfirmEmailDialog.newInstance();
+                    confirmEmailDialog.show(getSupportFragmentManager(), "email");
+                    isShownDialog = true;
+                }
+            } else {
+                preferencesHelper.putHasConfirmedEmail(true);
+                Log.wtf(TAG, "dialog not needed");
+                if (isShownDialog)
+                    confirmEmailDialog.dismiss();
+            }
+        }
     }
 
     class SelectedNavigationElement {

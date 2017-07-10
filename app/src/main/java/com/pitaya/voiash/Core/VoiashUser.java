@@ -75,6 +75,10 @@ public class VoiashUser implements Parcelable {
         this.pushToken = pushToken;
     }
 
+    public String getFullName() {
+        return String.format("%s %s", name, lastName);
+    }
+
     @Override
     public String toString() {
         return "VoiashUser{" +

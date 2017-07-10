@@ -2,18 +2,23 @@ package com.pitaya.voiash.UI.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.pitaya.voiash.R;
 
 public class SplashActivity extends AppCompatActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        FirebaseAuth.getInstance().signOut();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startActivity(new Intent(SplashActivity.this, WelcomeActivity.class));
+                finish();
+            }
+        }, 3000);
 
       /*  try {
             PackageInfo info = getPackageManager().getPackageInfo("com.pitaya.voiash", PackageManager.GET_SIGNATURES);
@@ -28,6 +33,14 @@ public class SplashActivity extends AppCompatActivity {
             e.printStackTrace();
         }*/
 
-        startActivity(new Intent(this, WelcomeActivity.class));
+        //startActivity(new Intent(this, WelcomeActivity.class));
+        //finish();
+    }
+
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 }

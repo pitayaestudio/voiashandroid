@@ -3,7 +3,6 @@ package com.pitaya.voiash.UI.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.text.TextUtils;
 import android.view.View;
@@ -12,6 +11,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -22,23 +22,23 @@ import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.pitaya.voiash.Core.AuthManager;
 import com.pitaya.voiash.Core.VoiashUser;
 import com.pitaya.voiash.R;
 import com.pitaya.voiash.Util.Log;
 
 import org.json.JSONObject;
 
-public class LoginActivity extends BaseAuthActivity implements View.OnClickListener {
+import static com.pitaya.voiash.Core.AuthManager.googleSignOut;
 
+public class LoginActivity extends BaseAuthActivity implements View.OnClickListener {
     private static final int RC_GOOGLE_SIGN_IN = 411;
     private static final String TAG = "LoginActivity";
     private Button email_sign_in_button;
@@ -69,21 +69,20 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
         callbackManager = CallbackManager.Factory.create();
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
-            public void onSuccess(LoginResult loginResult) {
+            public void onSuccess(final LoginResult loginResult) {
                 GraphRequest request = GraphRequest.newMeRequest(
                         loginResult.getAccessToken(),
                         new GraphRequest.GraphJSONObjectCallback() {
                             @Override
                             public void onCompleted(JSONObject object, GraphResponse response) {
                                 Log.v(TAG, response.toString());
+                                handleFacebookAccessToken(loginResult.getAccessToken());
                             }
                         });
                 Bundle parameters = new Bundle();
                 parameters.putString("fields", "id,name,email,gender,birthday");
                 request.setParameters(parameters);
                 request.executeAsync();
-
-
             }
 
             @Override
@@ -144,30 +143,47 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithEmail:failed");
                             showAlert(getString(R.string.error_title), getString(R.string.error_credentials));
+                        } else {
+                            preferencesHelper.putIsEmailProvider();
+                            preferencesHelper.putHasConfirmedEmail(task.getResult().getUser().isEmailVerified());
                         }
 
                     }
                 });
     }
 
-
     private void loginWithGoogle() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_GOOGLE_SIGN_IN);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_GOOGLE_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if (result.isSuccess()) {
-                GoogleSignInAccount account = result.getSignInAccount();
-                firebaseAuthWithGoogle(account);
-            } else {
-
-            }
-        }
+    private void handleFacebookAccessToken(final AccessToken token) {
+        Log.d(TAG, "handleFacebookAccessToken:" + token);
+        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = task.getResult().getUser();
+                            final VoiashUser voiashUser = new VoiashUser();
+                            voiashUser.setEmail(user.getEmail());
+                            voiashUser.setProvider("facebook");
+                            String[] name = user.getDisplayName().split(" ");
+                            voiashUser.setName(name[0]);
+                            if (name.length > 1)
+                                voiashUser.setLastName(name[1]);
+                            voiashUser.setProfilePicture("http://graph.facebook.com/" + token.getUserId() + "/picture?type=large");
+                            getBaseReference().child("users").child(task.getResult().getUser().getUid()).setValue(voiashUser).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    AuthManager.facebookSignOut();
+                                }
+                            });
+                        }
+                    }
+                });
     }
 
     private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
@@ -195,7 +211,7 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
                             getBaseReference().child("users").child(task.getResult().getUser().getUid()).setValue(voiashUser).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
-                                    googleSignOut();
+                                    googleSignOut(mGoogleApiClient);
                                     Log.w(TAG, task.isSuccessful() + "");
                                     if (task.isSuccessful()) {
                                         Log.w(TAG, voiashUser.toString());
@@ -204,36 +220,33 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
                                         task.getException().printStackTrace();
                                     }
                                 }
-
-                                private void googleSignOut() {
-                                    mGoogleApiClient.connect();
-                                    mGoogleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                                        @Override
-                                        public void onConnected(@Nullable Bundle bundle) {
-
-                                            FirebaseAuth.getInstance().signOut();
-                                            if(mGoogleApiClient.isConnected()) {
-                                                Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
-                                                    @Override
-                                                    public void onResult(@NonNull Status status) {
-                                                        if (status.isSuccess()) {
-                                                            Log.d(TAG, "User Logged out");
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onConnectionSuspended(int i) {
-                                            Log.d(TAG, "Google API Client Connection Suspended");
-                                        }
-                                    });
-                                }
                             });
                         }
                     }
                 });
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_GOOGLE_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (result.isSuccess()) {
+                GoogleSignInAccount account = result.getSignInAccount();
+                firebaseAuthWithGoogle(account);
+            } else {
+                Bundle bundle = data.getExtras();
+                if (bundle != null) {
+                    for (String key : bundle.keySet()) {
+                        Object value = bundle.get(key);
+                        Log.d(TAG, String.format("%s %s (%s)", key,
+                                value.toString(), value.getClass().getName()));
+                    }
+                }
+            }
+        }
+    }
+
 }
 

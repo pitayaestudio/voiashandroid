@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.pitaya.voiash.R;
 import com.pitaya.voiash.Util.Log;
+import com.pitaya.voiash.Util.PreferencesHelper;
 
 /**
  * Created by rulo on 04/07/17.
@@ -28,6 +29,7 @@ public class BaseAuthActivity extends BaseActivity implements GoogleApiClient.On
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        preferencesHelper = new PreferencesHelper(this);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -67,6 +69,7 @@ public class BaseAuthActivity extends BaseActivity implements GoogleApiClient.On
                 String uid = profile.getUid();
                 Log.wtf(TAG, "Logged " + providerId + " " + uid);
             }
+            Log.wtf(TAG, "LaunhingApp");
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);

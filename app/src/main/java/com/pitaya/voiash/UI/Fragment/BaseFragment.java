@@ -3,9 +3,15 @@ package com.pitaya.voiash.UI.Fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 public class BaseFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
+
     public BaseFragment() {
         // Required empty public constructor
     }
@@ -21,9 +27,11 @@ public class BaseFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+    }
 
-        }
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -45,5 +53,9 @@ public class BaseFragment extends Fragment {
 
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
+    }
+
+    public DatabaseReference getBaseReference() {
+        return FirebaseDatabase.getInstance().getReference().child("devDB");
     }
 }
