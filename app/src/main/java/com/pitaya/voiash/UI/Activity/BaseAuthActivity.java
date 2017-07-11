@@ -69,7 +69,7 @@ public class BaseAuthActivity extends BaseActivity implements GoogleApiClient.On
                 String uid = profile.getUid();
                 Log.wtf(TAG, "Logged " + providerId + " " + uid);
             }
-            Log.wtf(TAG, "LaunhingApp");
+
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);

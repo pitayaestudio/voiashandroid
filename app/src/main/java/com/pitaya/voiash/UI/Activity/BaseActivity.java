@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.Window;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -24,9 +25,11 @@ public class BaseActivity extends AppCompatActivity {
     private ProgressDialog dialog;
     PreferencesHelper preferencesHelper;
     SimpleDateFormat firebaseDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         preferencesHelper = new PreferencesHelper(this);
     }
 
@@ -37,6 +40,12 @@ public class BaseActivity extends AppCompatActivity {
     public DatabaseReference getUserReference() {
         if (FirebaseAuth.getInstance().getCurrentUser() != null)
             return getBaseReference().child("users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        return null;
+    }
+
+    public String getUserId() {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null)
+            return FirebaseAuth.getInstance().getCurrentUser().getUid();
         return null;
     }
 

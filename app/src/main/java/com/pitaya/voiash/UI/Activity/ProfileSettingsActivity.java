@@ -2,45 +2,50 @@ package com.pitaya.voiash.UI.Activity;
 
 import android.Manifest;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.UploadTask;
 import com.pitaya.voiash.Core.VoiashUser;
 import com.pitaya.voiash.R;
-import com.pitaya.voiash.Util.ImageSelectorHelper;
+import com.pitaya.voiash.Util.FirebaseStorageHelper;
+import com.pitaya.voiash.Util.ImageSelector.PickerBuilder;
 import com.pitaya.voiash.Util.Log;
 import com.pitaya.voiash.Util.PermissionsHelper;
+import com.pitaya.voiash.Util.UI;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
-import static com.pitaya.voiash.Util.PermissionsHelper.PERMISSIONS_RESULT;
 import static com.pitaya.voiash.Util.PermissionsHelper.validateGrantedPermissions;
 import static com.pitaya.voiash.Util.UI.setProfilePicture;
 
 public class ProfileSettingsActivity extends BaseMainActivity implements ValueEventListener {
-    private static final int MEDIA_REQUEST = 158;
+    private static final int CAMERA_REQUEST = 158;
     private static final int GALLERY_REQUEST = 714;
-    private static final int CROP_REQUEST = 116;
     private DatabaseReference userReference;
+    private Button btn_edit_save;
     private VoiashUser thisUser;
     private EditText[] editTexts;
     private TextInputLayout[] textInputLayouts;
@@ -49,10 +54,17 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
     private Calendar userDate = Calendar.getInstance();
     private String TAG = "ProfileSettingsActivity";
     private FloatingActionButton fab_edit_picture;
-    private ArrayList<String> permissionList = new ArrayList<String>() {{
+    private ArrayList<String> permissionListGallery = new ArrayList<String>() {{
         add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         add(Manifest.permission.READ_EXTERNAL_STORAGE);
     }};
+    private ArrayList<String> permissionListCamera = new ArrayList<String>() {{
+        add(Manifest.permission.CAMERA);
+        add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        add(Manifest.permission.READ_EXTERNAL_STORAGE);
+    }};
+    private FirebaseStorageHelper firebaseStorageHelper = new FirebaseStorageHelper();
+    private Uri pictureUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +72,7 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_profile_settings);
         img_edit_profile_picture = (ImageView) findViewById(R.id.img_edit_profile_picture);
+        btn_edit_save = (Button) findViewById(R.id.btn_edit_save);
         userReference = getUserReference();
         textInputLayouts = new TextInputLayout[]{
                 (TextInputLayout) findViewById(R.id.til_edit_name),
@@ -95,7 +108,12 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
                         userDate.get(Calendar.MONTH),
                         userDate.get(Calendar.DAY_OF_MONTH)
                 );
-                dpd.getDatePicker().setMaxDate(new Date().getTime());
+                Calendar maxCalendar = Calendar.getInstance();
+                maxCalendar.add(Calendar.YEAR, -18);
+                dpd.getDatePicker().setMaxDate(maxCalendar.getTime().getTime());
+                Calendar minCalendar = Calendar.getInstance();
+                minCalendar.add(Calendar.YEAR, -100);
+                dpd.getDatePicker().setMinDate(minCalendar.getTime().getTime());
                 dpd.show();
             }
         });
@@ -103,29 +121,50 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
         fab_edit_picture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (PermissionsHelper.checkAndRequestPermissions(ProfileSettingsActivity.this, MEDIA_REQUEST, permissionList)) {
-                    ImageSelectorHelper.requestFromGallery(ProfileSettingsActivity.this, GALLERY_REQUEST);
+                final CharSequence[] opsChars = {getString(R.string.lbl_take_photo), getString(R.string.lbl_select_from_gallery)};
+                new AlertDialog.Builder(ProfileSettingsActivity.this)
+                        .setTitle(getString(R.string.lbl_profile_picture))
+                        .setItems(opsChars, new android.content.DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case 0:
+                                        if (PermissionsHelper.checkAndRequestPermissions(ProfileSettingsActivity.this, CAMERA_REQUEST, permissionListCamera)) {
+                                            requestPictures(false);
+                                        }
+                                        break;
+                                    case 1:
+                                        if (PermissionsHelper.checkAndRequestPermissions(ProfileSettingsActivity.this, GALLERY_REQUEST, permissionListGallery)) {
+                                            requestPictures(true);
+                                        }
+                                        break;
+                                }
+                            }
+                        })
+                        .create()
+                        .show();
+
+
+              /*  if (PermissionsHelper.checkAndRequestPermissions(ProfileSettingsActivity.this, MEDIA_REQUEST, permissionListGallery)) {
+                    requestPictures();
+                }*/
+            }
+        });
+        btn_edit_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (validateFieds()) {
+                    attempSaveUser();
                 }
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_profile_settings, menu);
-        return true;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
         userReference.addValueEventListener(this);
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroy() {
+        super.onDestroy();
+        hideProgressDialog();
         userReference.removeEventListener(this);
     }
 
@@ -155,19 +194,9 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
 
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_save_profile_settings) {
-            if (validateFieds()) {
-                attempSaveUser();
-            }
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
+    @SuppressWarnings("VisibleForTests")
     private void attempSaveUser() {
-
-
+        showProgressDialog();
         thisUser.setName(editTexts[0].getText().toString());
         thisUser.setLastName(editTexts[1].getText().toString());
         if (!TextUtils.isEmpty(editTexts[2].getText().toString()))
@@ -175,35 +204,77 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
         userReference.setValue(thisUser).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                finish();
+                if (pictureUri == null) {
+                    finish();
+                } else {
+                    firebaseStorageHelper.uploadProfilePhoto(getUserId(), pictureUri, new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            hideProgressDialog();
+                            if (task.isSuccessful()) {
+                                getUserReference().child("profilePicture").setValue(task.getResult().getDownloadUrl().toString());
+                                setProfilePicture(ProfileSettingsActivity.this, pictureUri, img_edit_profile_picture);
+                                finish();
+                            }
+                        }
+                    });
+                }
             }
         });
     }
 
     private boolean validateFieds() {
+        for (int i = 0; i < editTexts.length; i++) {
+            if (TextUtils.isEmpty(editTexts[i].getText())) {
+                textInputLayouts[i].setErrorEnabled(true);
+                textInputLayouts[i].setError(getString(R.string.error_field_required));
+                editTexts[i].requestFocus();
+                return false;
+            }
+        }
         return true;
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (validateGrantedPermissions(permissions, grantResults, permissionList) == PERMISSIONS_RESULT.PERMISSIONS_OK) {
-            ImageSelectorHelper.requestFromGallery(ProfileSettingsActivity.this, GALLERY_REQUEST);
+        switch (requestCode) {
+            case GALLERY_REQUEST:
+                if (validateGrantedPermissions(permissions, grantResults, permissionListGallery) == PermissionsHelper.PERMISSIONS_RESULT.PERMISSIONS_OK) {
+                    requestPictures(true);
+                }
+                break;
+            case CAMERA_REQUEST:
+                if (validateGrantedPermissions(permissions, grantResults, permissionListCamera) == PermissionsHelper.PERMISSIONS_RESULT.PERMISSIONS_OK) {
+                    requestPictures(false);
+                }
+                break;
         }
+
     }
+
+
+    private void requestPictures(boolean fromGallery) {
+        new PickerBuilder(ProfileSettingsActivity.this, fromGallery ? PickerBuilder.SELECT_FROM_GALLERY : PickerBuilder.SELECT_FROM_CAMERA)
+                .setCropScreenColor(ContextCompat.getColor(ProfileSettingsActivity.this, R.color.colorPrimaryDark))
+                .setOnImageReceivedListener(new PickerBuilder.onImageReceivedListener() {
+                    @Override
+                    public void onImageReceived(final Uri imageUri) {
+                        pictureUri = imageUri;
+                        UI.setProfilePicture(ProfileSettingsActivity.this, imageUri, img_edit_profile_picture);
+                    }
+                })
+                .start();
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                case GALLERY_REQUEST:
-                   /*   Uri photoUri = onSelectFromGalleryResult(this, data);
-                        Glide.with(this).load(photoUri).into(img_edit_profile_picture);
-                        if (photoUri != null)
-                        cropImage(ProfileSettingsActivity.this, photoUri, CROP_REQUEST);*/
-                    break;
-            }
+
         }
     }
+
+
 }

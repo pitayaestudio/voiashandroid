@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -27,8 +26,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.pitaya.voiash.Core.AuthManager;
 import com.pitaya.voiash.Core.VoiashUser;
 import com.pitaya.voiash.R;
@@ -77,6 +80,7 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
                             public void onCompleted(JSONObject object, GraphResponse response) {
                                 Log.v(TAG, response.getJSONObject().toString());
                                 handleFacebookAccessToken(loginResult.getAccessToken(), response.getJSONObject().optString("birthday", null));
+                                showProgressDialog();
                             }
                         });
                 Bundle parameters = new Bundle();
@@ -127,7 +131,12 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
             til_email.setErrorEnabled(true);
             til_email.setError(getString(R.string.error_field_required));
             return;
+        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(et_mail.getText().toString()).matches()) {
+            til_email.setErrorEnabled(true);
+            til_email.setError(getString(R.string.error_invalid_email));
+            return;
         }
+
         if (TextUtils.isEmpty(et_pass.getText().toString())) {
             til_pass.setErrorEnabled(true);
             til_pass.setError(getString(R.string.error_field_required));
@@ -138,16 +147,12 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        hideProgressDialog();
-                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithEmail:failed");
-                            showAlert(getString(R.string.error_title), getString(R.string.error_credentials));
-                        } else {
+                        if (task.isSuccessful()) {
                             preferencesHelper.putIsEmailProvider();
                             preferencesHelper.putHasConfirmedEmail(task.getResult().getUser().isEmailVerified());
+                        } else {
+                            manageFirebaseError(task.getException());
                         }
-
                     }
                 });
     }
@@ -160,31 +165,27 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
     private void handleFacebookAccessToken(final AccessToken token, final String birthday) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-                        if (task.isSuccessful()) {
-                            FirebaseUser user = task.getResult().getUser();
-                            final VoiashUser voiashUser = new VoiashUser();
-                            voiashUser.setEmail(user.getEmail());
-                            voiashUser.setProvider("facebook");
-                            String[] name = user.getDisplayName().split(" ");
-                            voiashUser.setName(name[0]);
-                            voiashUser.setBirthday(birthday);
-                            if (name.length > 1)
-                                voiashUser.setLastName(name[1]);
-                            voiashUser.setProfilePicture("http://graph.facebook.com/" + token.getUserId() + "/picture?type=large");
-                            getBaseReference().child("users").child(task.getResult().getUser().getUid()).setValue(voiashUser).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    AuthManager.facebookSignOut();
-                                }
-                            });
-                        }
-                    }
-                });
+        mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                AuthManager.facebookSignOut();
+                if (task.isSuccessful()) {
+                    FirebaseUser user = task.getResult().getUser();
+                    final VoiashUser voiashUser = new VoiashUser();
+                    voiashUser.setEmail(user.getEmail());
+                    voiashUser.setProvider("facebook");
+                    String[] name = user.getDisplayName().split(" ");
+                    voiashUser.setName(name[0]);
+                    voiashUser.setBirthday(birthday);
+                    if (name.length > 1)
+                        voiashUser.setLastName(name[1]);
+                    voiashUser.setProfilePicture("http://graph.facebook.com/" + token.getUserId() + "/picture?type=large");
+                    setUserInfo(voiashUser);
+                } else {
+                    manageFirebaseError(task.getException());
+                }
+            }
+        });
     }
 
     private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
@@ -194,12 +195,7 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithCredential");
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
+                        if (task.isSuccessful()) {
                             Log.w(TAG, acct.getDisplayName());
                             String[] name = acct.getDisplayName().split(" ");
                             final VoiashUser voiashUser = new VoiashUser();
@@ -209,19 +205,10 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
                             if (name.length > 1)
                                 voiashUser.setLastName(name[1]);
                             voiashUser.setProfilePicture(acct.getPhotoUrl().toString());
-                            getBaseReference().child("users").child(task.getResult().getUser().getUid()).setValue(voiashUser).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    googleSignOut(mGoogleApiClient);
-                                    Log.w(TAG, task.isSuccessful() + "");
-                                    if (task.isSuccessful()) {
-                                        Log.w(TAG, voiashUser.toString());
-                                    } else {
-                                        Log.w(TAG, task.getException().getMessage());
-                                        task.getException().printStackTrace();
-                                    }
-                                }
-                            });
+                            googleSignOut(mGoogleApiClient);
+                            setUserInfo(voiashUser);
+                        } else {
+                            manageFirebaseError(task.getException());
                         }
                     }
                 });
@@ -232,22 +219,48 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_GOOGLE_SIGN_IN) {
+            showProgressDialog();
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
             } else {
-                Bundle bundle = data.getExtras();
-                if (bundle != null) {
-                    for (String key : bundle.keySet()) {
-                        Object value = bundle.get(key);
-                        Log.d(TAG, String.format("%s %s (%s)", key,
-                                value.toString(), value.getClass().getName()));
-                    }
-                }
+                hideProgressDialog();
             }
         }
     }
 
+    private void manageFirebaseError(Exception exception) {
+        hideProgressDialog();
+        Log.wtf(TAG, exception.getMessage());
+        exception.printStackTrace();
+        if (exception instanceof FirebaseAuthUserCollisionException) {
+            showAlert(getString(R.string.error_title), getString(R.string.lbl_collision_account));
+        } else {
+            showAlert(getString(R.string.error_title), getString(R.string.error_generic));
+        }
+    }
+
+    private void setUserInfo(final VoiashUser user) {
+        getUserReference().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue(VoiashUser.class) == null) {
+                    getUserReference().setValue(user);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        hideProgressDialog();
+    }
 }
 

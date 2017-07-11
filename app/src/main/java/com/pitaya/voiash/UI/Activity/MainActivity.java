@@ -17,6 +17,7 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.google.firebase.database.DatabaseReference;
 import com.pitaya.voiash.R;
 import com.pitaya.voiash.UI.Fragment.BaseFragment;
+import com.pitaya.voiash.UI.Fragment.BlankFragment;
 import com.pitaya.voiash.UI.Fragment.DialogFragment.ConfirmEmailDialog;
 import com.pitaya.voiash.UI.Fragment.ProfileFragment;
 import com.pitaya.voiash.Util.Log;
@@ -28,7 +29,7 @@ public class MainActivity extends BaseMainActivity implements BaseFragment.OnFra
     private SelectedNavigationElement selectedNavigationElement;
     private HashMap<Integer, Fragment> fragmentHashMap = new HashMap<>();
     private int mSelectedItem;
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "punchewey";
     private DatabaseReference userReference;
     Boolean isShownDialog = false;
     ConfirmEmailDialog confirmEmailDialog;
@@ -41,12 +42,11 @@ public class MainActivity extends BaseMainActivity implements BaseFragment.OnFra
         setContentView(R.layout.activity_main);
         bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
         // bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
-        //TODO Change Fragments
 
-        fragmentHashMap.put(0, ProfileFragment.newInstance());
-        fragmentHashMap.put(1, ProfileFragment.newInstance());
-        fragmentHashMap.put(2, ProfileFragment.newInstance());
-        fragmentHashMap.put(3, ProfileFragment.newInstance());
+        fragmentHashMap.put(0, BlankFragment.newInstance());
+        fragmentHashMap.put(1, BlankFragment.newInstance());
+        fragmentHashMap.put(2, BlankFragment.newInstance());
+        fragmentHashMap.put(3, BlankFragment.newInstance());
         fragmentHashMap.put(4, ProfileFragment.newInstance());
         // Create items
         AHBottomNavigationItem itemDiscover = new AHBottomNavigationItem(R.string.lbl_menu_discover, R.drawable.ic_discover, R.color.colorPrimaryDark);
@@ -67,14 +67,19 @@ public class MainActivity extends BaseMainActivity implements BaseFragment.OnFra
         ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         ft.replace(R.id.content_main, fragmentHashMap.get(0));
         ft.commit();
-
+        if (preferencesHelper.getFirstOpening()) {
+            bottomNavigation.setCurrentItem(4);
+            preferencesHelper.putFirstOpeningDisabled();
+        }
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
+        if (!mAuth.getCurrentUser().isAnonymous()) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_main, menu);
+        }
         return true;
     }
 

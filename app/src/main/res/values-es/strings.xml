@@ -22,17 +22,17 @@
     <string name="lbl_disclaimer">Al registrarte, aceptas los términos y condiciones de Voiash</string>
     <string name="lbl_loading_information">Cargando información</string>
     <string name="lbl_login">REGÍSTRATE Y DISFRUTA</string>
-    <string name="lbl_menu_chat">Chat</string>
-    <string name="lbl_menu_discover">Descubre</string>
-    <string name="lbl_menu_my_travel">Mi viaje</string>
-    <string name="lbl_menu_profile">Perfil</string>
-    <string name="lbl_menu_social">Social</string>
+    <string name="lbl_menu_chat">chat</string>
+    <string name="lbl_menu_discover">descubre</string>
+    <string name="lbl_menu_my_travel">mi viaje</string>
+    <string name="lbl_menu_profile">perfil</string>
+    <string name="lbl_menu_social">social</string>
     <string name="lbl_password_recover">Recuperar contraseña</string>
     <string name="lbl_password_recovery">Recordar contraseña</string>
     <string name="lbl_please_wait">Por favor espere</string>
     <string name="lbl_recover_sent">Se ha enviado un correo de recuperación al email proporcionado</string>
     <string name="lbl_recover_title">¿No recuerdas tu contraseña? Coloca tu email y nosotros te envíaremos un link para resetear tu password</string>
-    <string name="lbl_signin">Iniciar Sesión</string>
+    <string name="lbl_signin">Iniciar sesión</string>
     <string name="lbl_travel_deals">INGRESAR SIN REGISTRAR</string>
     <string name="prompt_confirm_password">Repetir contraseña</string>
     <string name="prompt_email">Email</string>
@@ -44,4 +44,9 @@
     <string name="lbl_create_account">Crea tu cuenta y vive un mundo de viajes y aventuras con Voiash</string>
     <string name="lbl_signup">Registrarse</string>
     <string name="format_years">%d años</string>
+    <string name="lbl_collision_account">Ya existe una cuenta con la misma dirección de correo electrónico. Por favor inicie sesión con el método asociado a esta cuenta.</string>
+    <string name="lbl_save_changes">Guardar cambios</string>
+    <string name="lbl_profile_picture">Foto de perfil</string>
+    <string name="lbl_select_from_gallery">Seleccionar de la galería</string>
+    <string name="lbl_take_photo">Cámara</string>
 </resources>

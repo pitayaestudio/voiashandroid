@@ -35,13 +35,21 @@
     <string name="lbl_recover_title">Do not you remember your password? Enter your email and we will send you a link to reset your password</string>
     <string name="lbl_recover_sent">A recovery email has been sent for the given address</string>
 
-    <string name="lbl_menu_discover">Discover</string>
-    <string name="lbl_menu_my_travel">My travel</string>
-    <string name="lbl_menu_social">Social</string>
-    <string name="lbl_menu_chat">Chat</string>
-    <string name="lbl_menu_profile">Profile</string>
+    <string name="lbl_menu_discover">discover</string>
+    <string name="lbl_menu_my_travel">my travel</string>
+    <string name="lbl_menu_social">social</string>
+    <string name="lbl_menu_chat">chat</string>
+    <string name="lbl_menu_profile">profile</string>
     <string name="lbl_account_deleted">The account has been deleted successfully</string>
     <string name="lbl_new_user">New user? Sign up here</string>
     <string name="lbl_create_account">Create your account and live a world of travel and adventure with Voiash</string>
     <string name="format_years">%d years</string>
+    <string name="lbl_collision_account">An account already exists with the same email address. Sign in using a provider associated with this email address.</string>
+    <string name="lbl_save_changes">Save changes</string>
+    <string name="lbl_profile_picture">Profile picture</string>
+    <string name="lbl_select_from_gallery">Select from gallery</string>
+    <string name="lbl_take_photo">Camera</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

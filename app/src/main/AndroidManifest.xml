@@ -2,14 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pitaya.voiash">
 
-    <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
     <application
         android:name=".Application.VoiashApplication"
         android:allowBackup="true"
@@ -18,7 +21,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.pitaya.voiash.fileprovider"
@@ -28,6 +30,16 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <activity
+            android:name=".Util.ImageSelector.TempActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Translucent" />
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
@@ -67,7 +79,12 @@
             android:icon="@drawable/ic_arrow_main"
             android:label="@string/lbl_password_recovery"
             android:screenOrientation="portrait" />
-        <activity android:name=".UI.Activity.ProfileSettingsActivity"></activity>
+        <activity
+            android:name=".UI.Activity.ProfileSettingsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".UI.Activity.ZoomImageActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

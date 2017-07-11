@@ -1,19 +1,18 @@
 package com.pitaya.voiash.UI.Fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -22,18 +21,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.pitaya.voiash.Core.VoiashUser;
 import com.pitaya.voiash.R;
-import com.pitaya.voiash.Util.Log;
+import com.pitaya.voiash.UI.Activity.BaseMainActivity;
+import com.pitaya.voiash.UI.Activity.ZoomImageActivity;
+import com.pitaya.voiash.Util.UI;
 
 import java.util.Calendar;
 
-import static com.pitaya.voiash.Util.UI.setProfilePicture;
+import static com.pitaya.voiash.Util.UserHelper.getFullName;
 
 public class ProfileFragment extends BaseFragment {
     private FirebaseUser firebaseUser;
     private DatabaseReference userReference;
     private ValueEventListener userListener;
     private TextView txt_profile_name, txt_profile_age;
-    private ImageView img_profile_picture;
+    private ImageView img_profile_picture, img_profile_back;
     private Button btn_delete_account, btn_sign_out;
     private final String TAG = "ProfileFragment";
 
@@ -53,6 +54,7 @@ public class ProfileFragment extends BaseFragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
         img_profile_picture = (ImageView) v.findViewById(R.id.img_profile_picture);
+        img_profile_back = (ImageView) v.findViewById(R.id.img_profile_back);
         txt_profile_name = (TextView) v.findViewById(R.id.txt_profile_name);
         btn_delete_account = (Button) v.findViewById(R.id.btn_delete_account);
         btn_sign_out = (Button) v.findViewById(R.id.btn_sign_out);
@@ -70,10 +72,22 @@ public class ProfileFragment extends BaseFragment {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     try {
-                        VoiashUser user = dataSnapshot.getValue(VoiashUser.class);
+                        final VoiashUser user = dataSnapshot.getValue(VoiashUser.class);
                         if (user != null) {
-                            txt_profile_name.setText(user.getFullName());
-                            setProfilePicture(getContext(), user.getProfilePicture(), img_profile_picture);
+                            txt_profile_name.setText(getFullName(user));
+                            UI.setProfilePicture(getContext(), user.getProfilePicture(), img_profile_picture);
+                            if (!TextUtils.isEmpty(user.getProfilePicture()))
+                                UI.setProfilePictureSquare(getContext(), user.getProfilePicture(), img_profile_back);
+                                img_profile_picture.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Intent intent = new Intent(getActivity(), ZoomImageActivity.class);
+                                        intent.putExtra(ZoomImageActivity.ZOOMABLE_USER, user);
+                                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(), img_profile_picture, "expanded_image");
+                                        startActivity(intent, options.toBundle());
+                                    }
+                                });
+
                             try {
                                 Calendar userDate = Calendar.getInstance();
                                 userDate.setTime(firebaseDateFormat.parse(user.getBirthday()));
@@ -99,22 +113,13 @@ public class ProfileFragment extends BaseFragment {
         btn_sign_out.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.wtf(TAG, "Sign Out");
-                FirebaseAuth.getInstance().signOut();
+                ((BaseMainActivity) getContext()).signOut();
             }
         });
         btn_delete_account.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.wtf(TAG, "Delete Account");
-                getBaseReference().child("users").child(firebaseUser.getUid()).removeValue();
-                firebaseUser.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Toast.makeText(getContext(), getString(R.string.lbl_account_deleted), Toast.LENGTH_SHORT).show();
-                    }
-                });
-
+                ((BaseMainActivity) getContext()).deleteAccount();
             }
         });
     }

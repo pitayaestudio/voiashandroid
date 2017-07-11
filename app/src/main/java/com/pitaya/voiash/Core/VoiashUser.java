@@ -101,10 +101,6 @@ public class VoiashUser implements Parcelable {
         this.birthday = birthday;
     }
 
-    public String getFullName() {
-        return String.format("%s %s", getName(), getLastName());
-    }
-
     @Override
     public String toString() {
         return "VoiashUser{" +

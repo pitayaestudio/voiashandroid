@@ -33,7 +33,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_fb" />
+                android:src="@drawable/ic_facebook_circulo" />
 
             <ImageButton
                 android:id="@+id/btn_login_google"
@@ -41,7 +41,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_g_logo" />
+                android:src="@drawable/ic_google_circulo" />
 
             <ImageButton
                 android:id="@+id/btn_login_mail"
@@ -49,7 +49,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_login_email" />
+                android:src="@drawable/ic_mail_circulo" />
         </LinearLayout>
 
         <TextView

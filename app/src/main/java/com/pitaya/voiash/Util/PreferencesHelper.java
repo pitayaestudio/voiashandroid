@@ -11,6 +11,7 @@ public class PreferencesHelper {
     private final Context context;
     private SharedPreferences preferences;
     private final String EMAIL_PROVIDER = "EMAIL_PROVIDER";
+    private final String FIRST_OPENING = "FIRST_OPENING";
     private final String HAS_CONFIRMED_EMAIL = "HAS_CONFIRMED_EMAIL";
 
     public PreferencesHelper(Context context) {
@@ -43,6 +44,16 @@ public class PreferencesHelper {
 
     public boolean getHasConfirmedEmail() {
         return preferences.getBoolean(HAS_CONFIRMED_EMAIL, false);
+    }
+
+    public boolean getFirstOpening() {
+        return preferences.getBoolean(FIRST_OPENING, true);
+    }
+
+    public void putFirstOpeningDisabled() {
+        SharedPreferences.Editor edit = preferences.edit();
+        edit.putBoolean(FIRST_OPENING, false);
+        edit.apply();
     }
 
 }

@@ -41,7 +41,12 @@ public class PasswordRecoverActivity extends BaseActivity {
                     til_recover_email.setErrorEnabled(true);
                     til_recover_email.setError(getString(R.string.error_field_required));
                     return;
+                } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(et_recover_email.getText().toString()).matches()) {
+                    til_recover_email.setErrorEnabled(true);
+                    til_recover_email.setError(getString(R.string.error_invalid_email));
+                    return;
                 }
+
                 FirebaseAuth.getInstance().sendPasswordResetEmail(et_recover_email.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {

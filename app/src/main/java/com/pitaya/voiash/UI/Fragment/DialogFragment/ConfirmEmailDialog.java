@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.pitaya.voiash.R;
+import com.pitaya.voiash.Util.PreferencesHelper;
 
 
 /**
@@ -68,6 +69,7 @@ public class ConfirmEmailDialog extends DialogFragment {
         btn_close_confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                new PreferencesHelper(getContext()).clear();
                 FirebaseAuth.getInstance().signOut();
             }
         });
