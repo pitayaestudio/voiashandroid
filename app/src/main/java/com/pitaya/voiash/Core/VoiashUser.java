@@ -16,25 +16,9 @@ public class VoiashUser implements Parcelable {
     private String provider;
     private String pushToken;
     private String birthday;
+    private String fbToken;
 
     public VoiashUser() {
-    }
-
-
-    protected VoiashUser(Parcel in) {
-        email = in.readString();
-        lastName = in.readString();
-        name = in.readString();
-        phoneNumber = in.readString();
-        profilePicture = in.readString();
-        provider = in.readString();
-        pushToken = in.readString();
-        birthday = in.readString();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
     }
 
     public String getEmail() {
@@ -101,18 +85,29 @@ public class VoiashUser implements Parcelable {
         this.birthday = birthday;
     }
 
+    public String getFbToken() {
+        return fbToken;
+    }
+
+    public void setFbToken(String fbToken) {
+        this.fbToken = fbToken;
+    }
+
+    protected VoiashUser(Parcel in) {
+        email = in.readString();
+        lastName = in.readString();
+        name = in.readString();
+        phoneNumber = in.readString();
+        profilePicture = in.readString();
+        provider = in.readString();
+        pushToken = in.readString();
+        birthday = in.readString();
+        fbToken = in.readString();
+    }
+
     @Override
-    public String toString() {
-        return "VoiashUser{" +
-                "email='" + email + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", name='" + name + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", profilePicture='" + profilePicture + '\'' +
-                ", provider='" + provider + '\'' +
-                ", pushToken='" + pushToken + '\'' +
-                ", birthday='" + birthday + '\'' +
-                '}';
+    public int describeContents() {
+        return 0;
     }
 
     @Override
@@ -125,6 +120,7 @@ public class VoiashUser implements Parcelable {
         dest.writeString(provider);
         dest.writeString(pushToken);
         dest.writeString(birthday);
+        dest.writeString(fbToken);
     }
 
     @SuppressWarnings("unused")
@@ -139,4 +135,19 @@ public class VoiashUser implements Parcelable {
             return new VoiashUser[size];
         }
     };
+
+    @Override
+    public String toString() {
+        return "VoiashUser{" +
+                "email='" + email + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", name='" + name + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", profilePicture='" + profilePicture + '\'' +
+                ", provider='" + provider + '\'' +
+                ", pushToken='" + pushToken + '\'' +
+                ", birthday='" + birthday + '\'' +
+                ", fbToken='" + fbToken + '\'' +
+                '}';
+    }
 }

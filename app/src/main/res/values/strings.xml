@@ -23,7 +23,7 @@
     <string name="lbl_signup">sign up</string>
     <string name="error_required_field">Required field</string>
     <string name="error_title">Error</string>
-    <string name="error_generic">An error has ocurred, please try again</string>
+    <string name="error_generic">An imageError has ocurred, please try again</string>
     <string name="error_user_exists">A user already exists with this email</string>
     <string name="error_credentials">Invalid email or password</string>
     <string name="error_password_spaces">Your password must not contain spaces</string>

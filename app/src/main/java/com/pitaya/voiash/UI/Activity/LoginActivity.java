@@ -68,7 +68,7 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
         et_mail = (EditText) findViewById(R.id.et_email);
         et_pass = (EditText) findViewById(R.id.et_pass);
         email_sign_in_button.setOnClickListener(this);
-        loginButton.setReadPermissions(new String[]{"public_profile", "email", "user_birthday"});
+        loginButton.setReadPermissions(new String[]{"public_profile", "email", "user_birthday", "user_photos"});
         callbackManager = CallbackManager.Factory.create();
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -168,8 +168,8 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                AuthManager.facebookSignOut();
                 if (task.isSuccessful()) {
+
                     FirebaseUser user = task.getResult().getUser();
                     final VoiashUser voiashUser = new VoiashUser();
                     voiashUser.setEmail(user.getEmail());
@@ -180,8 +180,11 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
                     if (name.length > 1)
                         voiashUser.setLastName(name[1]);
                     voiashUser.setProfilePicture("http://graph.facebook.com/" + token.getUserId() + "/picture?type=large");
+                    voiashUser.setFbToken(token.getToken());
+                    preferencesHelper.putFacebookToken(token.getToken());
                     setUserInfo(voiashUser);
                 } else {
+                    AuthManager.facebookSignOut();
                     manageFirebaseError(task.getException());
                 }
             }
@@ -245,8 +248,13 @@ public class LoginActivity extends BaseAuthActivity implements View.OnClickListe
         getUserReference().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue(VoiashUser.class) == null) {
+                VoiashUser thisUser = dataSnapshot.getValue(VoiashUser.class);
+                if (thisUser == null) {
                     getUserReference().setValue(user);
+                } else {
+                    if (!TextUtils.isEmpty(thisUser.getFbToken())) {
+                        preferencesHelper.putFacebookToken(thisUser.getFbToken());
+                    }
                 }
             }
 

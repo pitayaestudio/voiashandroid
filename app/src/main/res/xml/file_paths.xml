@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<paths xmlns:android="http://schemas.android.com/apk/res/android">
+<paths>
     <external-path
-        name="voiash_images"
-        path="Android/data/com.pitaya.voiash/files/Pictures" />
+        name="Voiash"
+        path="." />
 </paths>

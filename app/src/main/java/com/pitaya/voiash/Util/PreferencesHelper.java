@@ -13,6 +13,7 @@ public class PreferencesHelper {
     private final String EMAIL_PROVIDER = "EMAIL_PROVIDER";
     private final String FIRST_OPENING = "FIRST_OPENING";
     private final String HAS_CONFIRMED_EMAIL = "HAS_CONFIRMED_EMAIL";
+    private final String FACEBOOK_TOKEN = "FACEBOOK_TOKEN";
 
     public PreferencesHelper(Context context) {
         preferences = context.getSharedPreferences("MUAPP_PREF", Context.MODE_PRIVATE);
@@ -56,4 +57,13 @@ public class PreferencesHelper {
         edit.apply();
     }
 
+    public void putFacebookToken(String facebookToken) {
+        SharedPreferences.Editor edit = preferences.edit();
+        edit.putString(FACEBOOK_TOKEN, facebookToken);
+        edit.apply();
+    }
+
+    public String getFacebookToken() {
+        return preferences.getString(FACEBOOK_TOKEN, null);
+    }
 }

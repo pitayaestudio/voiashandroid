@@ -9,6 +9,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.pitaya.voiash.Core.AuthManager;
 import com.pitaya.voiash.R;
 import com.pitaya.voiash.Util.Log;
 
@@ -30,6 +31,7 @@ public class BaseMainActivity extends BaseActivity implements FirebaseAuth.AuthS
     @Override
     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
         if (firebaseAuth.getCurrentUser() == null) {
+            AuthManager.facebookSignOut();
             Intent intent = new Intent(this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
@@ -39,6 +41,10 @@ public class BaseMainActivity extends BaseActivity implements FirebaseAuth.AuthS
 
     public void signOut() {
         Log.wtf(TAG, "Sign Out");
+        if (mAuth.getCurrentUser().isAnonymous()) {
+            deleteAccount();
+            return;
+        }
         showProgressDialog();
         preferencesHelper.clear();
         mAuth.signOut();

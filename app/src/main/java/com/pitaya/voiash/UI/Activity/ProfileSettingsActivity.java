@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,6 +19,9 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -34,10 +38,13 @@ import com.pitaya.voiash.Util.Log;
 import com.pitaya.voiash.Util.PermissionsHelper;
 import com.pitaya.voiash.Util.UI;
 
+import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import static com.pitaya.voiash.UI.Activity.FBAlbumsActivity.FACEBOOK_ALBUM_REQUEST;
+import static com.pitaya.voiash.UI.Activity.FBPicturesActivity.EXTRA_SELECTED_IMAGE;
 import static com.pitaya.voiash.Util.PermissionsHelper.validateGrantedPermissions;
 import static com.pitaya.voiash.Util.UI.setProfilePicture;
 
@@ -65,6 +72,7 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
     }};
     private FirebaseStorageHelper firebaseStorageHelper = new FirebaseStorageHelper();
     private Uri pictureUri;
+    private String pictureURL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,7 +129,7 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
         fab_edit_picture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final CharSequence[] opsChars = {getString(R.string.lbl_take_photo), getString(R.string.lbl_select_from_gallery)};
+                final CharSequence[] opsChars = {getString(R.string.lbl_take_photo), getString(R.string.lbl_select_from_gallery), "Facebook"};
                 new AlertDialog.Builder(ProfileSettingsActivity.this)
                         .setTitle(getString(R.string.lbl_profile_picture))
                         .setItems(opsChars, new android.content.DialogInterface.OnClickListener() {
@@ -137,6 +145,9 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
                                         if (PermissionsHelper.checkAndRequestPermissions(ProfileSettingsActivity.this, GALLERY_REQUEST, permissionListGallery)) {
                                             requestPictures(true);
                                         }
+                                        break;
+                                    case 2:
+                                        startActivityForResult(new Intent(ProfileSettingsActivity.this, FBAlbumsActivity.class), FACEBOOK_ALBUM_REQUEST);
                                         break;
                                 }
                             }
@@ -204,9 +215,9 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
         userReference.setValue(thisUser).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                if (pictureUri == null) {
+                if (pictureUri == null && pictureURL == null) {
                     finish();
-                } else {
+                } else if (pictureUri != null) {
                     firebaseStorageHelper.uploadProfilePhoto(getUserId(), pictureUri, new OnCompleteListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
@@ -216,6 +227,26 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
                                 setProfilePicture(ProfileSettingsActivity.this, pictureUri, img_edit_profile_picture);
                                 finish();
                             }
+                        }
+                    });
+                } else if (pictureURL != null) {
+                    Glide.with(ProfileSettingsActivity.this).load(pictureURL).asBitmap().into(new SimpleTarget<Bitmap>(512, 512) {
+                        @Override
+                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                            resource.compress(Bitmap.CompressFormat.PNG, 90, stream);
+                            byte[] byteArray = stream.toByteArray();
+                            firebaseStorageHelper.uploadProfilePhoto(getUserId(), byteArray, new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                    hideProgressDialog();
+                                    if (task.isSuccessful()) {
+                                        getUserReference().child("profilePicture").setValue(task.getResult().getDownloadUrl().toString());
+                                        setProfilePicture(ProfileSettingsActivity.this, pictureUri, img_edit_profile_picture);
+                                        finish();
+                                    }
+                                }
+                            });
                         }
                     });
                 }
@@ -261,6 +292,7 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
                     @Override
                     public void onImageReceived(final Uri imageUri) {
                         pictureUri = imageUri;
+                        pictureURL = null;
                         UI.setProfilePicture(ProfileSettingsActivity.this, imageUri, img_edit_profile_picture);
                     }
                 })
@@ -272,7 +304,13 @@ public class ProfileSettingsActivity extends BaseMainActivity implements ValueEv
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-
+            switch (requestCode) {
+                case FACEBOOK_ALBUM_REQUEST:
+                    String fbPictureUrl = pictureURL = data.getExtras().getString(EXTRA_SELECTED_IMAGE);
+                    pictureUri = null;
+                    setProfilePicture(this, fbPictureUrl, img_edit_profile_picture);
+                    break;
+            }
         }
     }
 

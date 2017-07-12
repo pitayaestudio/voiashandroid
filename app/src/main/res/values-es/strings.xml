@@ -6,7 +6,7 @@
     <string name="action_sign_in">Iniciar con email</string>
     <string name="error_credentials">Correo electrónico o contraseña incorrecta</string>
     <string name="error_field_required">Campo requerido</string>
-    <string name="error_generic">Se ha producido un error. Inténtalo de nuevo</string>
+    <string name="error_generic">Se ha producido un imageError. Inténtalo de nuevo</string>
     <string name="error_incorrect_password">Contraseña incorrecta</string>
     <string name="error_invalid_email">Correo electrónico inválido</string>
     <string name="error_invalid_password">La contraseña es demasiado corta</string>

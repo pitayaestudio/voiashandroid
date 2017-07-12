@@ -9,14 +9,18 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 
 import com.pitaya.voiash.R;
+import com.pitaya.voiash.Util.Log;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * Created by rulo on 11/07/17.
@@ -98,7 +102,15 @@ public abstract class PickerManager {
         // long currentTimeMillis = System.currentTimeMillis();
         // String photoName = imageName + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date(currentTimeMillis)) + ".jpg";
         File photo = new File(path, finalPhotoName);
-        return Uri.fromFile(photo);
+
+        Log.wtf("URI", getApplicationContext().getPackageName() + ".fileprovider");
+
+        Uri apkURI = FileProvider.getUriForFile(getApplicationContext(),
+                getApplicationContext()
+                        .getPackageName() + ".fileprovider", photo);
+        Log.wtf("URI", apkURI.toString());
+        Log.wtf("URI", photo.getPath());
+        return apkURI;
     }
 
     public void setUri(Uri uri) {
