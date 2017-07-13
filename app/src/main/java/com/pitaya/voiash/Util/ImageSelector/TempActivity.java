@@ -39,7 +39,6 @@ public class TempActivity extends AppCompatActivity {
                     uri = data.getData();
                 else
                     uri = pickerManager.getImageFile();
-
                 pickerManager.setUri(uri);
                 pickerManager.startCropActivity();
                 break;

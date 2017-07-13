@@ -12,7 +12,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 
 import com.pitaya.voiash.R;
-import com.pitaya.voiash.Util.Log;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
@@ -85,6 +84,14 @@ public abstract class PickerManager {
     protected abstract void sendToExternalApp();
 
     protected Uri getImageFile() {
+        return Uri.fromFile(createFile());
+    }
+
+    protected Uri getPhotoUri() {
+        return FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName() + ".fileprovider", createFile());
+    }
+
+    public File createFile() {
         String imagePathStr = Environment.getExternalStorageDirectory() + "/" +
                 (folder == null ?
                         Environment.DIRECTORY_DCIM + "/" + activity.getString(R.string.app_name) :
@@ -98,19 +105,7 @@ public abstract class PickerManager {
         String finalPhotoName = imageName +
                 (withTimeStamp ? "_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date(System.currentTimeMillis())) : "")
                 + ".jpg";
-
-        // long currentTimeMillis = System.currentTimeMillis();
-        // String photoName = imageName + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date(currentTimeMillis)) + ".jpg";
-        File photo = new File(path, finalPhotoName);
-
-        Log.wtf("URI", getApplicationContext().getPackageName() + ".fileprovider");
-
-        Uri apkURI = FileProvider.getUriForFile(getApplicationContext(),
-                getApplicationContext()
-                        .getPackageName() + ".fileprovider", photo);
-        Log.wtf("URI", apkURI.toString());
-        Log.wtf("URI", photo.getPath());
-        return apkURI;
+        return new File(path, finalPhotoName);
     }
 
     public void setUri(Uri uri) {
